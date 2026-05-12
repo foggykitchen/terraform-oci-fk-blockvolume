@@ -1,0 +1,115 @@
+#cloud-config
+write_files:
+  - path: /usr/local/sbin/fk-mount-block-volume.sh
+    owner: root:root
+    permissions: "0755"
+    content: |
+      #!/bin/bash
+      set -euo pipefail
+
+      MOUNT_POINT="${mount_point}"
+      FILESYSTEM_LABEL="${filesystem_label}"
+
+      log() {
+        echo "[fk-blockvolume] $1"
+      }
+
+      root_source=$(findmnt -n -o SOURCE /)
+      root_parent=$(lsblk -no PKNAME "$root_source" 2>/dev/null || true)
+      root_disk=""
+      if [ -n "$root_parent" ]; then
+        root_disk="/dev/$root_parent"
+      fi
+
+      mkdir -p "$MOUNT_POINT"
+
+      if command -v dnf >/dev/null 2>&1; then
+        dnf install -y -q iscsi-initiator-utils parted e2fsprogs util-linux
+      fi
+
+      systemctl enable --now iscsid || true
+      systemctl enable --now ocid.service || true
+
+      for portal in 169.254.2.2; do
+        while read -r _ target; do
+          [ -n "$target" ] || continue
+          if ! iscsiadm -m session 2>/dev/null | grep -q "$target"; then
+            log "Logging in to iSCSI target $target via $portal"
+            iscsiadm -m node -o new -T "$target" -p "$portal:3260" || true
+            iscsiadm -m node -o update -T "$target" -n node.startup -v automatic
+            iscsiadm -m node -T "$target" -p "$portal:3260" -l || true
+          fi
+        done < <(iscsiadm -m discovery -t sendtargets -p "$portal:3260" 2>/dev/null || true)
+      done
+
+      sleep 5
+
+      existing_partition=$(blkid -L "$FILESYSTEM_LABEL" 2>/dev/null || true)
+      if [ -n "$existing_partition" ]; then
+        partition="$existing_partition"
+      fi
+
+      candidate_disk=""
+      if [ -z "$${partition:-}" ]; then
+        for _ in $(seq 1 60); do
+          while read -r disk; do
+            [ -n "$disk" ] || continue
+            [ "$disk" = "$root_disk" ] && continue
+            if ! lsblk -nrpo NAME,TYPE "$disk" | awk '$2 == "part" { found=1 } END { exit(found ? 0 : 1) }'; then
+              candidate_disk="$disk"
+              break
+            fi
+          done < <(lsblk -dnpo NAME,TYPE | awk '$2 == "disk" { print $1 }')
+
+          if [ -n "$candidate_disk" ]; then
+            break
+          fi
+
+          sleep 10
+        done
+
+        if [ -z "$candidate_disk" ]; then
+          log "No additional data disk detected after waiting."
+          exit 1
+        fi
+
+        partition="$${candidate_disk}1"
+
+        if ! lsblk -nrpo NAME "$candidate_disk" | grep -qx "$partition"; then
+          log "Creating GPT and primary partition on $candidate_disk"
+          parted "$candidate_disk" --script -- mklabel gpt
+          parted "$candidate_disk" --script -- mkpart primary ext4 0% 100%
+          partprobe "$candidate_disk"
+          udevadm settle
+        fi
+      fi
+
+      fs_type=$(blkid -s TYPE -o value "$partition" 2>/dev/null || true)
+      if [ -z "$fs_type" ]; then
+        log "Formatting $partition as ext4"
+        mkfs.ext4 -F -L "$FILESYSTEM_LABEL" "$partition"
+        udevadm settle
+      fi
+
+      uuid=$(blkid -s UUID -o value "$partition")
+      if [ -z "$uuid" ]; then
+        log "Filesystem UUID for $partition is empty."
+        exit 1
+      fi
+
+      fstab_entry="UUID=$uuid $MOUNT_POINT ext4 defaults,noatime,_netdev,nofail 0 2"
+
+      if ! grep -Fq "UUID=$uuid $MOUNT_POINT ext4" /etc/fstab; then
+        log "Adding fstab entry for $partition"
+        echo "$fstab_entry" >> /etc/fstab
+      fi
+
+      if ! mountpoint -q "$MOUNT_POINT"; then
+        log "Mounting $MOUNT_POINT"
+        mount "$MOUNT_POINT"
+      fi
+
+      log "Block volume mounted successfully on $MOUNT_POINT"
+
+runcmd:
+  - [ bash, -lc, "/usr/local/sbin/fk-mount-block-volume.sh | tee /var/log/fk-mount-block-volume.log" ]
