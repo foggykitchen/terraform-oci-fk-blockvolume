@@ -19,4 +19,12 @@ module "compute" {
   ssh_authorized_keys = [
     tls_private_key.public_private_key_pair.public_key_openssh
   ]
+  user_data = base64encode(templatefile("${path.module}/cloud-init.yaml.tftpl", {
+    volumes = [for key in sort(keys(var.data_volumes)) : {
+      key              = key
+      size_in_gbs      = var.data_volumes[key].size_in_gbs
+      mount_point      = var.data_volumes[key].mount_point
+      filesystem_label = var.data_volumes[key].filesystem_label
+    }]
+  }))
 }

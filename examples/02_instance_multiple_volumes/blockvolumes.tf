@@ -9,7 +9,8 @@ module "data_volume" {
   size_in_gbs = each.value.size_in_gbs
   vpus_per_gb = each.value.vpus_per_gb
 
-  attach_to_instance = true
-  instance_id        = module.compute.instance_id
-  freeform_tags      = var.freeform_tags
+  attach_to_instance                = true
+  instance_id                       = module.compute.instance_id
+  is_agent_auto_iscsi_login_enabled = false
+  freeform_tags                     = var.freeform_tags
 }

@@ -34,17 +34,23 @@ variable "volume_name_prefix" {
 
 variable "data_volumes" {
   type = map(object({
-    size_in_gbs = number
-    vpus_per_gb = number
+    size_in_gbs      = number
+    vpus_per_gb      = number
+    mount_point      = string
+    filesystem_label = string
   }))
   default = {
     data01 = {
-      size_in_gbs = 100
-      vpus_per_gb = 10
+      size_in_gbs      = 100
+      vpus_per_gb      = 10
+      mount_point      = "/u01"
+      filesystem_label = "u01"
     }
     data02 = {
-      size_in_gbs = 150
-      vpus_per_gb = 20
+      size_in_gbs      = 150
+      vpus_per_gb      = 20
+      mount_point      = "/u02"
+      filesystem_label = "u02"
     }
   }
 }
