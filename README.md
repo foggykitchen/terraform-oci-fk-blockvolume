@@ -77,7 +77,7 @@ terraform-oci-fk-blockvolume/
 
 ```hcl
 module "data_volume" {
-  source = "git::https://github.com/mlinxfeld/terraform-oci-fk-blockvolume.git?ref=v0.1.0"
+  source = "git::https://github.com/foggykitchen/terraform-oci-fk-blockvolume.git?ref=v0.1.0"
 
   name                = "fk-blockvolume-data01"
   compartment_ocid    = var.compartment_ocid
@@ -134,7 +134,7 @@ OCI block storage actually behaves.
 
 - [terraform-oci-fk-vcn](https://github.com/foggykitchen/terraform-oci-fk-vcn)
 - [terraform-oci-fk-compute](https://github.com/foggykitchen/terraform-oci-fk-compute)
-- [terraform-oci-fk-filestorage](https://github.com/mlinxfeld/terraform-oci-fk-filestorage)
+- [terraform-oci-fk-filestorage](https://github.com/foggykitchen/terraform-oci-fk-filestorage)
 - [terraform-az-fk-disk](https://github.com/mlinxfeld/terraform-az-fk-disk)
 
 ---
