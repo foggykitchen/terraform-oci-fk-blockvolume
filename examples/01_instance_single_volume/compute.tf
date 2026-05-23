@@ -1,5 +1,5 @@
 module "compute" {
-  source = "git::https://github.com/mlinxfeld/terraform-oci-fk-compute.git"
+  source = "git::https://github.com/foggykitchen/terraform-oci-fk-compute.git"
 
   name             = "fk-oci-blockvolume-single"
   tenancy_ocid     = var.tenancy_ocid

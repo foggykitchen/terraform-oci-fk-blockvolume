@@ -132,8 +132,8 @@ OCI block storage actually behaves.
 
 ## Related Modules & Training
 
-- [terraform-oci-fk-vcn](https://github.com/mlinxfeld/terraform-oci-fk-vcn)
-- [terraform-oci-fk-compute](https://github.com/mlinxfeld/terraform-oci-fk-compute)
+- [terraform-oci-fk-vcn](https://github.com/foggykitchen/terraform-oci-fk-vcn)
+- [terraform-oci-fk-compute](https://github.com/foggykitchen/terraform-oci-fk-compute)
 - [terraform-oci-fk-filestorage](https://github.com/mlinxfeld/terraform-oci-fk-filestorage)
 - [terraform-az-fk-disk](https://github.com/mlinxfeld/terraform-az-fk-disk)
 
