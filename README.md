@@ -9,6 +9,8 @@ It is part of the **[FoggyKitchen.com training ecosystem](https://foggykitchen.c
 designed as a dedicated **storage persistence layer** for OCI compute
 workloads.
 
+Support expectations are documented in [SUPPORT.md](SUPPORT.md).
+
 ---
 
 ## Purpose
