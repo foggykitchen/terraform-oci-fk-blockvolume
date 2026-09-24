@@ -5,7 +5,7 @@ progressive examples for deploying **Oracle Cloud Infrastructure (OCI)
 Block Volumes** and attaching them to **Compute Instances** in a clean,
 explicit, and architecture-aware way.
 
-It is part of the **[FoggyKitchen.com training ecosystem](https://foggykitchen.com/courses-2/)** and is
+It is part of the **[FoggyKitchen.com training ecosystem](https://foggykitchen.com/)** and is
 designed as a dedicated **storage persistence layer** for OCI compute
 workloads.
 
