@@ -13,6 +13,21 @@ Support expectations are documented in [SUPPORT.md](SUPPORT.md).
 
 ---
 
+## OCI provider compatibility
+
+Release v0.2.0 requires `oracle/oci >= 9.12.1, < 10.0.0`, matching the BaseDB module. This drops provider 6.x support. Run `tofu init -upgrade` and review a plan before applying to existing infrastructure. Use the previous release (v0.1.0) if your stack still requires OCI 6.x.
+
+Examples use the local module checkout. Configuration validation does not establish runtime behavior or a replacement-free upgrade.
+
+### Plan verification — 2026-11-12
+
+Verified with OpenTofu 1.11.6 and OCI provider 9.13.0 in isolated directories without existing state. Root module validation and all example plans passed using real OCI data-source reads and existing local authentication inputs. No `apply` was run. These are fresh-deployment plans, not state-upgrade or runtime tests.
+
+| Example | Add | Change | Destroy |
+| --- | ---: | ---: | ---: |
+| `01_instance_single_volume` | 9 | 0 | 0 |
+| `02_instance_multiple_volumes` | 11 | 0 | 0 |
+
 ## Purpose
 
 The goal of this repository is to provide a **clear, educational, and
@@ -79,7 +94,7 @@ terraform-oci-fk-blockvolume/
 
 ```hcl
 module "data_volume" {
-  source = "git::https://github.com/foggykitchen/terraform-oci-fk-blockvolume.git?ref=v0.1.0"
+  source = "git::https://github.com/foggykitchen/terraform-oci-fk-blockvolume.git?ref=v0.2.0"
 
   name                = "fk-blockvolume-data01"
   compartment_ocid    = var.compartment_ocid
